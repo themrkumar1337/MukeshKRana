@@ -1,21 +1,33 @@
 import { Resend } from 'resend';
 import { NextResponse } from 'next/server';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 export async function POST(req: Request) {
+  // 1. Check if the API key exists before initializing
+  const apiKey = process.env.RESEND_API_KEY;
+
+  if (!apiKey) {
+    console.error("Critical: RESEND_API_KEY is missing from environment variables.");
+    return NextResponse.json(
+      { error: "Email service configuration missing" }, 
+      { status: 500 }
+    );
+  }
+
+  // 2. Initialize Resend inside the function to prevent build errors
+  const resend = new Resend(apiKey);
+
   try {
     const { name, email, type, message } = await req.json();
 
-    // 1. Internal Notification (Email to Mukesh)
+    // 3. Internal Notification (Email to Mukesh)
     await resend.emails.send({
       from: 'Mukesh HQ <office@mukeshkrana.com>',
-      to: ['mukesh@bharatsec.com'], // Your personal/work inbox
+      to: ['mukesh@bharatsec.com'], 
       subject: `New Strategic Inquiry: ${type}`,
       html: `<p>New message from <b>${name}</b> (${email}) regarding <b>${type}</b>:</p><p>${message}</p>`
     });
 
-    // 2. Auto-Reply (Email to the Visitor)
+    // 4. Auto-Reply (Email to the Visitor)
     await resend.emails.send({
       from: 'Mukesh K. Rana <office@mukeshkrana.com>',
       to: [email],
@@ -41,7 +53,8 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
+    console.error("Inquiry Transmission Error:", error);
     return NextResponse.json({ error: "Transmission failed" }, { status: 500 });
   }
 }
