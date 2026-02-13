@@ -9,18 +9,17 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "#050505", // Deep Onyx
-        brand: "#3b82f6",      // Electric Blue
-      },
-      // Premium 2026 Animations
-      animation: {
-        "fade-in": "fadeIn 0.8s ease-out forwards",
-      },
-      keyframes: {
-        fadeIn: {
-          "0%": { opacity: "0", transform: "translateY(10px)" },
-          "100%": { opacity: "1", transform: "translateY(0)" },
+        background: "#050505",
+        foreground: "#ffffff",
+        brand: {
+          // Tactical Gold / Bronze for a premium executive feel
+          DEFAULT: "#c5a059", 
+          light: "#e2c28a",
+          dark: "#8e6f3e",
         },
+        slate: {
+          950: "#0a0a0c",
+        }
       },
     },
   },

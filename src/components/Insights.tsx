@@ -1,35 +1,36 @@
 "use client"
+import React from 'react'
 import { motion } from 'framer-motion'
-import { ArrowUpRight, Trophy, Mic, Newspaper } from 'lucide-react'
+import { ArrowUpRight, Shield, Globe, Lightbulb } from 'lucide-react'
 
 export default function Insights() {
-  const accolades = [
-    { title: "The Decentralized Future", source: "Global Tech Summit 2025", type: "Keynote" },
-    { title: "Architecting AI Infrastructure", source: "Forbes Feature", type: "Article" },
-    { title: "The Ethics of Digital Defense", source: "TechCrunch Panel", type: "Speaking" }
+  const logs = [
+    { title: "Defensive Architecture in 2026", cat: "Cybersecurity", icon: <Shield size={16} /> },
+    { title: "The CEO's Blueprint for Scaling", cat: "Leadership", icon: <Globe size={16} /> },
+    { title: "Transparency in Modern Ventures", cat: "Unfiltered", icon: <Lightbulb size={16} /> }
   ];
 
   return (
-    <section id="insights" className="py-32 px-6 max-w-7xl mx-auto">
-      <h2 className="text-4xl font-bold mb-20 text-center uppercase tracking-widest">Recognition</h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {accolades.map((item, i) => (
-          <motion.div 
-            key={i} 
-            whileHover={{ scale: 1.02 }}
-            className="glass p-8 rounded-[2.5rem] border-white/5 flex flex-col justify-between h-64"
-          >
-            <div>
-              <p className="text-brand text-xs font-bold uppercase tracking-widest mb-4">{item.type}</p>
-              <h3 className="text-2xl font-bold leading-tight">{item.title}</h3>
-            </div>
-            <div className="flex justify-between items-end">
-              <span className="text-gray-500 text-sm italic">{item.source}</span>
-              <ArrowUpRight className="text-white/20" size={20} />
-            </div>
-          </motion.div>
-        ))}
+    <section id="insights" className="py-32 bg-[#050505]">
+      <div className="container mx-auto px-6">
+        <div className="max-w-3xl mb-16">
+          <h2 className="text-[10px] uppercase tracking-[0.4em] font-black text-brand mb-4 italic">Executive Journals</h2>
+          <h1 className="text-4xl md:text-5xl font-bold text-white italic">Strategic <span className="text-brand">Intelligence.</span></h1>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {logs.map((log, i) => (
+            <motion.div key={i} whileHover={{ y: -10 }} className="p-8 rounded-[2rem] bg-white/[0.02] border border-white/5 hover:border-brand/20 transition-all group cursor-pointer">
+              <div className="mb-12 p-3 w-fit bg-brand/5 rounded-xl text-brand">{log.icon}</div>
+              <span className="text-[9px] font-black text-brand uppercase tracking-[0.3em] mb-3 block">{log.cat}</span>
+              <h3 className="text-lg font-bold text-white mb-6 leading-tight group-hover:text-brand transition-colors">{log.title}</h3>
+              <div className="flex items-center gap-2 text-[9px] font-bold text-gray-500 uppercase tracking-widest">
+                Access Log <ArrowUpRight size={12} />
+              </div>
+            </motion.div>
+          ))}
+        </div>
       </div>
     </section>
-  );
+  )
 }

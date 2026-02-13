@@ -2,7 +2,7 @@ import { Resend } from 'resend';
 import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
-  // 1. Check if the API key exists before initializing
+  // Check for the API key at runtime to prevent Vercel build errors
   const apiKey = process.env.RESEND_API_KEY;
 
   if (!apiKey) {
@@ -13,25 +13,34 @@ export async function POST(req: Request) {
     );
   }
 
-  // 2. Initialize Resend inside the function to prevent build errors
+  // Initialize Resend safely inside the request handler
   const resend = new Resend(apiKey);
 
   try {
     const { name, email, type, message } = await req.json();
 
-    // 3. Internal Notification (Email to Mukesh)
+    // 1. Internal Notification (Email to Mukesh's Office)
     await resend.emails.send({
       from: 'Mukesh HQ <office@mukeshkrana.com>',
-      to: ['mukesh@bharatsec.com'], 
+      to: ['mukesh@bharatsec.com'], // Sent to your primary business email
       subject: `New Strategic Inquiry: ${type}`,
-      html: `<p>New message from <b>${name}</b> (${email}) regarding <b>${type}</b>:</p><p>${message}</p>`
+      html: `
+        <div style="font-family: sans-serif; padding: 20px; color: #333;">
+          <h2>Strategic Inquiry Received</h2>
+          <p><b>From:</b> ${name} (${email})</p>
+          <p><b>Interest:</b> ${type}</p>
+          <hr />
+          <p><b>Message:</b></p>
+          <p>${message}</p>
+        </div>
+      `
     });
 
-    // 4. Auto-Reply (Email to the Visitor)
+    // 2. Auto-Reply (Professional Acknowledgment to the Visitor)
     await resend.emails.send({
       from: 'Mukesh K. Rana <office@mukeshkrana.com>',
       to: [email],
-      subject: `Re: Strategic Inquiry - Mukesh K. Rana`,
+      subject: `Acknowledgment: Inquiry regarding ${type}`,
       html: `
         <div style="font-family: 'Helvetica', sans-serif; max-width: 600px; margin: auto; padding: 40px; border: 1px solid #eee; border-radius: 20px;">
           <h2 style="color: #111; letter-spacing: -1px;">Acknowledgment of Inquiry</h2>
@@ -40,7 +49,7 @@ export async function POST(req: Request) {
             Thank you for reaching out regarding <b>${type}</b>. This message serves as a formal confirmation that your inquiry has been received by my office.
           </p>
           <p style="color: #444; line-height: 1.6;">
-            I personally review all strategic proposals and partnership requests. Given the current volume of operations across <b>BharatSec</b> and <b>Smart Platter</b>, please allow 48-72 hours for a formal response.
+            I personally review all strategic proposals and partnership requests. Given the current volume of operations across <b>BharatSec</b> and my other ventures, please allow 48-72 hours for a formal response.
           </p>
           <p style="color: #444; line-height: 1.6;">
             In the meantime, feel free to explore my latest insights on cybersecurity and entrepreneurship via my official channels.
@@ -55,6 +64,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error("Inquiry Transmission Error:", error);
-    return NextResponse.json({ error: "Transmission failed" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Transmission failed", details: error.message }, 
+      { status: 500 }
+    );
   }
 }

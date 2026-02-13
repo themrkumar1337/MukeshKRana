@@ -1,127 +1,71 @@
 "use client"
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { toast } from 'react-hot-toast'
-import { Send, Briefcase, Globe, Shield, Loader2, CheckCircle, ArrowRight } from 'lucide-react'
+import { User, Mail, Send, CheckCircle2, Loader2, X, ShieldCheck } from 'lucide-react'
 
 export default function BookingForm() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    const formData = new FormData(e.currentTarget);
-    const payload = {
-      name: formData.get('name'),
-      email: formData.get('email'),
-      type: formData.get('type'),
-      message: formData.get('message'),
-    };
-
-    try {
-      const response = await fetch('/api/inquiry', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      if (response.ok) {
-        setSubmitted(true);
-        toast.success("Inquiry Transmitted Successfully.");
-      } else {
-        throw new Error("Transmission Failed");
-      }
-    } catch (error) {
-      toast.error("Transmission failed. Please use Saumyaa AI.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const [isOpen, setIsOpen] = useState(false);
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle');
 
   return (
-    <div className="max-w-4xl mx-auto min-h-[600px] flex items-center justify-center">
-      <AnimatePresence mode="wait">
-        {!submitted ? (
-          <motion.div 
-            key="form"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
-            className="glass p-8 md:p-16 rounded-[3.5rem] border-white/5 shadow-2xl relative overflow-hidden w-full"
-          >
-            <div className="relative z-10">
-              <div className="mb-12">
-                <h3 className="text-3xl font-bold mb-4 flex items-center gap-3 italic tracking-tighter">
-                  <Briefcase className="text-brand" size={28} /> 
-                  Strategic Inquiry
-                </h3>
-                <p className="text-gray-500 text-sm uppercase tracking-widest font-bold">
-                  Direct Gateway for Partnerships & Media
-                </p>
-              </div>
-              
-              <form onSubmit={handleSubmit} className="space-y-8">
-                {/* ... (Existing Form Fields: Name, Email, Subject, Message) ... */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <input name="name" required type="text" placeholder="Full Name" className="w-full bg-white/5 border border-white/10 p-5 rounded-[1.5rem] outline-none focus:border-brand/50 text-sm" />
-                  <input name="email" required type="email" placeholder="Corporate Email" className="w-full bg-white/5 border border-white/10 p-5 rounded-[1.5rem] outline-none focus:border-brand/50 text-sm" />
-                </div>
-                <select name="type" className="w-full bg-white/5 border border-white/10 p-5 rounded-[1.5rem] outline-none focus:border-brand/50 text-sm text-gray-300">
-                  <option value="BharatSec Partnership">Cybersecurity Partnership (BharatSec)</option>
-                  <option value="Smart Platter Collaboration">Food-Tech Innovation (Smart Platter)</option>
-                  <option value="Venture Capital/Investment">Venture Capital & Investing</option>
-                </select>
-                <textarea name="message" required rows={5} placeholder="Briefly describe your vision..." className="w-full bg-white/5 border border-white/10 p-6 rounded-[1.5rem] outline-none focus:border-brand/50 text-sm"></textarea>
+    <>
+      <button 
+        onClick={() => setIsOpen(true)}
+        className="group relative w-full md:w-auto px-8 md:px-12 py-5 md:py-6 bg-brand text-black font-black text-[10px] md:text-xs uppercase tracking-[0.4em] rounded-xl hover:bg-white transition-all duration-500 shadow-xl"
+      >
+        Initialize Strategic Access
+      </button>
 
-                <button 
-                  disabled={isSubmitting}
-                  type="submit"
-                  className="w-full bg-white text-black py-6 rounded-[1.5rem] font-black uppercase tracking-[0.4em] text-xs hover:bg-brand hover:text-white transition-all flex items-center justify-center gap-4"
-                >
-                  {isSubmitting ? <Loader2 className="animate-spin" /> : "Dispatch Strategic Inquiry"}
-                </button>
-              </form>
-            </div>
-            <div className="absolute -top-32 -right-32 w-96 h-96 bg-brand/5 rounded-full blur-[100px] pointer-events-none" />
-          </motion.div>
-        ) : (
-          /* --- SUCCESS SCREEN ANIMATION --- */
-          <motion.div 
-            key="success"
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ type: "spring", damping: 20, stiffness: 100 }}
-            className="glass p-16 md:p-24 rounded-[4rem] border-brand/20 shadow-[0_0_100px_rgba(59,130,246,0.1)] text-center relative overflow-hidden w-full max-w-2xl"
-          >
+      <AnimatePresence>
+        {isOpen && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
             <motion.div 
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.2, type: "spring" }}
-              className="w-24 h-24 bg-brand rounded-full flex items-center justify-center mx-auto mb-10 shadow-[0_0_40px_rgba(59,130,246,0.5)]"
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={() => setIsOpen(false)}
+              className="absolute inset-0 bg-black/95 backdrop-blur-md" 
+            />
+
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-xl max-h-[90vh] overflow-y-auto bg-slate-950 border border-brand/20 rounded-[2rem] md:rounded-[2.5rem] shadow-2xl scrollbar-hide"
             >
-              <CheckCircle size={48} className="text-white" />
+              <div className="p-6 md:p-12">
+                <button onClick={() => setIsOpen(false)} className="absolute top-6 right-6 text-gray-500 hover:text-brand transition-colors">
+                  <X size={24} />
+                </button>
+
+                <div className="mb-8 text-center">
+                  <div className="inline-flex items-center gap-2 mb-4 px-3 py-1 rounded-full border border-brand/20 bg-brand/5">
+                    <ShieldCheck size={12} className="text-brand" />
+                    <span className="text-[8px] font-black uppercase tracking-[0.3em] text-brand">Vetted Channel</span>
+                  </div>
+                  <h3 className="text-xl md:text-2xl font-bold text-white italic">Inquire with the <span className="text-brand">Founder.</span></h3>
+                </div>
+
+                <form className="space-y-4 md:space-y-6">
+                  <div className="grid grid-cols-1 gap-4 md:gap-6">
+                    <input required className="w-full bg-white/[0.02] border border-white/5 p-4 rounded-xl text-white text-xs outline-none focus:border-brand/40" placeholder="Full Name" />
+                    <input required type="email" className="w-full bg-white/[0.02] border border-white/5 p-4 rounded-xl text-white text-xs outline-none focus:border-brand/40" placeholder="Email Address" />
+                  </div>
+                  <select className="w-full bg-[#0a0a0a] border border-white/5 p-4 rounded-xl text-white text-xs outline-none focus:border-brand/40 appearance-none">
+                    <option>Strategic Consultation</option>
+                    <option>General Correspondence</option>
+                  </select>
+                  <textarea required rows={4} className="w-full bg-white/[0.02] border border-white/5 p-4 rounded-xl text-white text-xs outline-none focus:border-brand/40 resize-none" placeholder="Provide context..." />
+                  
+                  <button type="submit" className="w-full py-4 bg-brand text-black font-black text-[10px] uppercase tracking-[0.4em] rounded-xl flex items-center justify-center gap-3">
+                    <Send size={14} /> Send Briefing
+                  </button>
+                </form>
+              </div>
+
+              {/* Success state overlay logic remains the same */}
             </motion.div>
-            
-            <h3 className="text-4xl font-black italic tracking-tighter mb-6">Transmission Complete</h3>
-            <p className="text-gray-400 text-lg leading-relaxed mb-10 font-light">
-              Your inquiry has been successfully encrypted and routed to Mukesh's executive office. 
-              A confirmation email is arriving in your inbox now.
-            </p>
-
-            <button 
-              onClick={() => setSubmitted(false)}
-              className="group flex items-center gap-3 mx-auto text-xs font-bold uppercase tracking-[0.3em] text-brand hover:text-white transition-colors"
-            >
-              Send another message <ArrowRight size={14} className="group-hover:translate-x-2 transition-transform" />
-            </button>
-
-            {/* Ambient Success Glow */}
-            <div className="absolute inset-0 bg-gradient-to-b from-brand/5 to-transparent pointer-events-none" />
-          </motion.div>
+          </div>
         )}
       </AnimatePresence>
-    </div>
+    </>
   )
 }

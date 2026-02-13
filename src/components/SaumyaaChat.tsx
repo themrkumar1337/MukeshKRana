@@ -1,18 +1,22 @@
 "use client"
 import React, { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Send, BotMessageSquare, X, MessageCircle, User, Loader2 } from 'lucide-react'
+import { Send, BotMessageSquare, X, MessageCircle, Loader2 } from 'lucide-react'
 
 export default function SaumyaaChat() {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState([
-    { id: '1', role: 'assistant', content: "Hello, I am Saumyaa. How can I assist you with Mukesh's ventures today?" }
+    { 
+      id: '1', 
+      role: 'assistant', 
+      content: "Hello, I am Saumyaa. How can I assist you with Mukesh's ventures or cybersecurity inquiries today?" 
+    }
   ]);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll logic
+  // Auto-scroll logic for new messages
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -35,9 +39,16 @@ export default function SaumyaaChat() {
         body: JSON.stringify({ messages: [...messages, userMsg] }),
       });
 
-      if (!response.ok) throw new Error('Failed to connect');
+      if (response.status === 429) {
+        setMessages(prev => [
+          ...prev, 
+          { id: 'err', role: 'assistant', content: "My systems are currently recalibrating due to high demand. Please try again in 60 seconds." }
+        ]);
+        return;
+      }
 
-      // Setup for streaming
+      if (!response.ok) throw new Error('Network response was not ok');
+
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
       let assistantMsg = { id: (Date.now() + 1).toString(), role: 'assistant', content: '' };
@@ -45,11 +56,10 @@ export default function SaumyaaChat() {
       setMessages(prev => [...prev, assistantMsg]);
 
       while (true) {
-        const { done, value } = await reader!.read();
-        if (done) break;
-        const chunk = decoder.decode(value);
+        const result = await reader?.read();
+        if (!result || result.done) break;
+        const chunk = decoder.decode(result.value);
         
-        // Update the last message in state with the new chunk
         assistantMsg.content += chunk;
         setMessages(prev => [
           ...prev.slice(0, -1),
@@ -57,7 +67,7 @@ export default function SaumyaaChat() {
         ]);
       }
     } catch (error) {
-      console.error("Saumyaa Error:", error);
+      console.error("Saumyaa Chat Error:", error);
     } finally {
       setIsLoading(false);
     }
@@ -71,7 +81,7 @@ export default function SaumyaaChat() {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="glass mb-6 w-80 md:w-96 h-[550px] rounded-[2.5rem] flex flex-col overflow-hidden border-white/10 shadow-2xl origin-bottom-right"
+            className="glass mb-6 w-80 md:w-96 h-[550px] rounded-[2.5rem] flex flex-col overflow-hidden border border-white/10 shadow-2xl bg-[#0a0a0a]"
           >
             {/* Header */}
             <div className="p-6 border-b border-white/5 bg-white/5 flex justify-between items-center">
@@ -88,8 +98,8 @@ export default function SaumyaaChat() {
             <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-hide bg-black/20">
               {messages.map((m) => (
                 <div key={m.id} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`p-4 rounded-2xl text-[13px] leading-relaxed ${
-                    m.role === 'user' ? 'bg-brand text-white' : 'bg-white/5 text-gray-300 border border-white/5'
+                  <div className={`p-4 rounded-2xl text-[13px] leading-relaxed shadow-sm ${
+                    m.role === 'user' ? 'bg-brand text-white' : 'bg-white/5 text-gray-300 border border-white/10'
                   }`}>
                     {m.content}
                   </div>
@@ -108,15 +118,16 @@ export default function SaumyaaChat() {
               <div className="relative flex items-center">
                 <input 
                   type="text"
+                  autoComplete="off"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="Inquire with Saumyaa..."
-                  className="w-full bg-white/5 border border-white/10 p-4 pr-14 rounded-2xl outline-none text-xs text-white"
+                  className="w-full bg-white/5 border border-white/10 p-4 pr-14 rounded-2xl outline-none text-xs text-white placeholder:text-gray-500 focus:border-brand/40 transition-all"
                 />
                 <button 
                   type="submit" 
                   disabled={!input.trim() || isLoading}
-                  className="absolute right-2 p-2.5 bg-white text-black rounded-xl hover:bg-brand hover:text-white transition-all disabled:opacity-20"
+                  className="absolute right-2 p-2.5 bg-white text-black rounded-xl hover:bg-brand hover:text-white transition-all disabled:opacity-20 shadow-lg"
                 >
                   <Send size={16} />
                 </button>
@@ -127,8 +138,10 @@ export default function SaumyaaChat() {
       </AnimatePresence>
 
       <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(!isOpen)}
-        className="w-16 h-16 bg-brand rounded-full flex items-center justify-center text-white shadow-xl shadow-brand/20"
+        className="w-16 h-16 bg-brand rounded-full flex items-center justify-center text-white shadow-xl shadow-brand/20 border border-white/10"
       >
         {isOpen ? <X size={28} /> : <MessageCircle size={28} />}
       </motion.button>
